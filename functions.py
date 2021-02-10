@@ -12,11 +12,12 @@ import math
 ##############################################################################
 
 
-def link_cameras_into_scene():
-
+def link_camera_collection_to_scene():
+    """Link the camera collection to the scene"""
     scene_collection = bpy.context.scene.collection
+    cam_collection = camera_collection()
     if not "cameras.GRP.001" in scene_collection.children:
-        scene_collection.children.link(camera_collection)
+        scene_collection.children.link(cam_collection)
 
 
 def autorename_shots():

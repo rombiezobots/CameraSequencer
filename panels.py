@@ -34,6 +34,8 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         sub.operator('camera_sequencer.clear_shots',
                      icon='X', text='')
         sub.separator()
+        sub.operator('camera_sequencer.link_camera_collection_to_scene',
+                     icon='OUTLINER_OB_CAMERA', text='')
         sub.operator('camera_sequencer.clean_up_cameras',
                      icon='BRUSH_DATA', text='')
         sub.separator()
