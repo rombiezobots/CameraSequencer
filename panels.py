@@ -23,7 +23,6 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     def draw(self, context):
         scene = context.scene
         lay = self.layout
-        lay.operator('camera_sequencer.import_milkshake_shots')
         col = lay.column(align=True)
         sub = col.row(align=True)
         sub.operator('camera_sequencer.new_shot',
