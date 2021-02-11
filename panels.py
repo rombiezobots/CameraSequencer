@@ -57,7 +57,8 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             block_1_top_right = block_1_top.row(align=True)
             block_1_top_right.prop(data=shot,
                                    property='camera_object',
-                                   text='')
+                                   text='',
+                                   icon='CAMERA_DATA')
             duration_seconds = shot.duration / scene.render.fps * scene.render.fps_base
             block_1_top_right.prop(data=shot,
                                    property='duration',
