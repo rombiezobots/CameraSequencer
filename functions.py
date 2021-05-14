@@ -162,14 +162,18 @@ def sync_timeline(self, context) -> None:
     scene = context.scene
     scene.timeline_markers.clear()
     new_start_frame = scene.camera_sequencer_settings.start_frame
-    for shot in scene.camera_sequencer_shots:
-        marker = scene.timeline_markers.new(
-            shot.code, frame=new_start_frame)
-        if shot.camera_object != None:
-            marker.camera = shot.camera_object
-        new_start_frame += shot.duration
-    scene.frame_start = scene.camera_sequencer_settings.start_frame
-    scene.frame_end = new_start_frame - 1
+    scene.frame_start = new_start_frame
+
+    if len(scene.camera_sequencer_shots) > 0:
+        for shot in scene.camera_sequencer_shots:
+            marker = scene.timeline_markers.new(
+                shot.code, frame=new_start_frame)
+            if shot.camera_object != None:
+                marker.camera = shot.camera_object
+            new_start_frame += shot.duration
+        scene.frame_end = new_start_frame - 1
+    else:
+        scene.frame_end = new_start_frame + 100
     return None  # Required by bpy
 
 
