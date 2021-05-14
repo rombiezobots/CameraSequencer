@@ -130,7 +130,8 @@ def move_shot_down(index: int):
 def new_shot():
     """Create a new shot and camera"""
 
-    shot = bpy.context.scene.camera_sequencer_shots.add()
+    scene = bpy.context.scene
+    shot = scene.camera_sequencer_shots.add()
     camera = bpy.data.cameras.new("Camera")
     camera.display_size = 1
     camera.dof.aperture_blades = 5
@@ -150,6 +151,9 @@ def new_shot():
     cam_collection = camera_collection()
     cam_collection.objects.link(camera_object)
     shot.camera_object = camera_object
+
+    if len(scene.camera_sequencer_shots) == 1:
+        scene.camera = camera_object
 
 
 def object_must_be_camera(self, ob):
