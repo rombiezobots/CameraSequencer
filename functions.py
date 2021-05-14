@@ -52,17 +52,6 @@ def clear_shots():
     scene.camera_sequencer_shots.clear()
 
 
-def import_milkshake_shots():
-    scene = bpy.context.scene
-    for old_shot in scene.milkshake_shots:
-        new_shot = scene.camera_sequencer_shots.add()
-        new_shot.code = old_shot.code
-        new_shot.duration = old_shot.duration
-        new_shot.camera_object = old_shot.camera_object
-        new_shot.notes = old_shot.notes
-    scene.milkshake_shots.clear()
-
-
 def isolate_shot(target_index: int):
     """Use this shot's frame range as the timeline's preview range"""
 
@@ -172,14 +161,14 @@ def sync_timeline(self, context) -> None:
 
     scene = context.scene
     scene.timeline_markers.clear()
-    new_start_frame = 1001
+    new_start_frame = scene.camera_sequencer_settings.start_frame
     for shot in scene.camera_sequencer_shots:
         marker = scene.timeline_markers.new(
             shot.code, frame=new_start_frame)
         if shot.camera_object != None:
             marker.camera = shot.camera_object
         new_start_frame += shot.duration
-    scene.frame_start = 1001
+    scene.frame_start = scene.camera_sequencer_settings.start_frame
     scene.frame_end = new_start_frame - 1
     return None  # Required by bpy
 

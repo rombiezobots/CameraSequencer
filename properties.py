@@ -7,13 +7,22 @@ if 'functions' in locals():
     import importlib
     functions = importlib.reload(functions)
 else:
-    from CameraSequencer import functions
+    from . import functions
     import bpy
 
 
 ##############################################################################
 # Properties
 ##############################################################################
+
+
+class CameraSequencerSettings(bpy.types.PropertyGroup):
+
+    start_frame: bpy.props.IntProperty(name='Start Frame', default=1,
+                                       update=functions.sync_timeline,
+                                       min=0,
+                                       description='Shots should start at this frame',
+                                       options=set())
 
 
 class Shot(bpy.types.PropertyGroup):
@@ -40,18 +49,24 @@ class Shot(bpy.types.PropertyGroup):
 ##############################################################################
 
 
+classes = [
+    Shot,
+    CameraSequencerSettings
+]
+
+
 def register():
-    bpy.utils.register_class(Shot)
-    bpy.types.Scene.milkshake_shots = bpy.props.CollectionProperty(
-        type=Shot)
-    bpy.types.Scene.camera_sequencer_shots = bpy.props.CollectionProperty(
-        type=Shot)
+    for c in classes:
+        bpy.utils.register_class(c)
+    bpy.types.Scene.camera_sequencer_shots = bpy.props.CollectionProperty(type=Shot)
+    bpy.types.Scene.camera_sequencer_settings = bpy.props.PointerProperty(type=CameraSequencerSettings)
 
 
 def unregister():
-    bpy.utils.unregister_class(Shot)
+    for c in classes:
+        bpy.utils.unregister_class(c)
     try:
-        del bpy.types.Scene.milkshake_shots
         del bpy.types.Scene.camera_sequencer_shots
+        del bpy.types.Scene.camera_sequencer_settings
     except:
         pass

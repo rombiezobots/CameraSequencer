@@ -23,6 +23,10 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     def draw(self, context):
         scene = context.scene
         lay = self.layout
+        box_settings = lay.box()
+        box_settings.use_property_split = True
+        box_settings.prop(scene.camera_sequencer_settings, 'start_frame')
+        lay.separator()
         col = lay.column(align=True)
         sub = col.row(align=True)
         sub.operator('camera_sequencer.new_shot',
@@ -75,6 +79,8 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
 ##############################################################################
 # Registration
 ##############################################################################
+
+
 register, unregister = bpy.utils.register_classes_factory([
     PROPERTIES_PT_camera_sequencer
 ])

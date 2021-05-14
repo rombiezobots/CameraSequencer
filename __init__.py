@@ -15,7 +15,7 @@ if 'properties' in locals():
     operators = importlib.reload(operators)
     panels = importlib.reload(panels)
 else:
-    from CameraSequencer import properties, operators, panels
+    from . import properties, operators, panels
 
 
 ###############################################################################
