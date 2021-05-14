@@ -12,14 +12,6 @@ import math
 ##############################################################################
 
 
-def link_camera_collection_to_scene():
-    """Link the camera collection to the scene"""
-    scene_collection = bpy.context.scene.collection
-    cam_collection = camera_collection()
-    if not "cameras.GRP.001" in scene_collection.children:
-        scene_collection.children.link(cam_collection)
-
-
 def autorename_shots():
     """Auto-rename all shots"""
 
@@ -31,10 +23,18 @@ def camera_collection() -> bpy.types.Collection:
     """Return the scene's camera collection"""
 
     collections = bpy.data.collections
+    
+    # If the collection doesn't exist yet, create it
     if not "cameras.GRP.001" in collections.keys():
         camera_collection = collections.new("cameras.GRP.001")
     else:
         camera_collection = collections['cameras.GRP.001']
+
+    # If the collection isn't in the scene yet, link it
+    scene_collection = bpy.context.scene.collection
+    if not "cameras.GRP.001" in scene_collection.children:
+        scene_collection.children.link(camera_collection)
+
     return camera_collection
 
 

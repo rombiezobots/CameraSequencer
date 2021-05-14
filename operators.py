@@ -16,20 +16,6 @@ else:
 ##############################################################################
 
 
-class CAMERASEQUENCER_OT_import_milkshake_shots(bpy.types.Operator):
-    """Import shots from Milkshake, and delete the old CollectionProperty"""
-
-    bl_idname = 'camera_sequencer.import_milkshake_shots'
-    bl_label = 'Import Milkshake Shots'
-    bl_options = {'UNDO'}
-    index: bpy.props.IntProperty()
-
-    def execute(self, context):
-        functions.import_milkshake_shots()
-        functions.sync_timeline(self, context)
-        return {'FINISHED'}
-
-
 class CAMERASEQUENCER_OT_clear_shots(bpy.types.Operator):
     """Clear the shot list."""
 
@@ -163,19 +149,6 @@ class CAMERASEQUENCER_OT_clean_up_cameras(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CAMERASEQUENCER_OT_link_camera_collection_to_scene(bpy.types.Operator):
-    """Link the camera collection to the scene"""
-
-    bl_idname = 'camera_sequencer.link_camera_collection_to_scene'
-    bl_label = 'Link Camera Collection to Scene'
-    bl_options = {'UNDO'}
-    index: bpy.props.IntProperty()
-
-    def execute(self, context):
-        functions.link_camera_collection_to_scene()
-        return {'FINISHED'}
-
-
 ##############################################################################
 # Registration
 ##############################################################################
@@ -185,13 +158,11 @@ register, unregister = bpy.utils.register_classes_factory([
     CAMERASEQUENCER_OT_clean_up_cameras,
     CAMERASEQUENCER_OT_clear_shots,
     CAMERASEQUENCER_OT_delete_shot,
-    CAMERASEQUENCER_OT_import_milkshake_shots,
     CAMERASEQUENCER_OT_isolate_shot,
     CAMERASEQUENCER_OT_jump_shots,
     CAMERASEQUENCER_OT_jump_to_specific_shot,
     CAMERASEQUENCER_OT_move_shot_down,
     CAMERASEQUENCER_OT_move_shot_up,
     CAMERASEQUENCER_OT_new_shot,
-    CAMERASEQUENCER_OT_setup_metadata_stamping,
-    CAMERASEQUENCER_OT_link_camera_collection_to_scene
+    CAMERASEQUENCER_OT_setup_metadata_stamping
 ])
