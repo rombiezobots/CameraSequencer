@@ -4,6 +4,7 @@
 
 
 import bpy
+from . import addon_updater_ops
 
 
 ##############################################################################
@@ -23,6 +24,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     def draw(self, context):
         scene = context.scene
         lay = self.layout
+        addon_updater_ops.update_notice_box_ui(self, context)
         box_settings = lay.box()
         box_settings.use_property_split = True
         box_settings.prop(scene.camera_sequencer_settings, 'start_frame')
