@@ -33,9 +33,17 @@ class Shot(bpy.types.PropertyGroup):
     duration: bpy.props.IntProperty(name='Frames',
                                     default=24,
                                     min=1,
-                                    update=functions.sync_timeline,
+                                    update=functions.change_shot_duration,
                                     subtype='TIME',
                                     description='Duration in frames')
+
+    # This is to circumvent the fact that Blender doesn't automatically
+    # provide update functions with what has changed since last calling
+    # it. When changing a shot's duration, we compare it to
+    # previous_duration's value to determine for how many frames any
+    # camera animation should be moved.
+    previous_duration: bpy.props.IntProperty(default=24)
+
     camera_object: bpy.props.PointerProperty(name='Camera',
                                              type=bpy.types.Object,
                                              update=functions.sync_timeline,

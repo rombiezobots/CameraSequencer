@@ -23,7 +23,7 @@ def camera_collection() -> bpy.types.Collection:
     """Return the scene's camera collection"""
 
     collections = bpy.data.collections
-    
+
     # If the collection doesn't exist yet, create it
     if not "cameras.GRP.001" in collections.keys():
         camera_collection = collections.new("cameras.GRP.001")
@@ -39,8 +39,13 @@ def camera_collection() -> bpy.types.Collection:
 
 
 def delete_shot(index: int):
-    """Delete the selected shot and the associated camera"""
-    bpy.context.scene.camera_sequencer_shots.remove(index)
+    """Delete the selected shot, and move up subsequent shots"""
+
+    shots = bpy.context.scene.camera_sequencer_shots
+    duration = shots[index].duration
+    for shot_index in range(index + 1, len(shots)):
+        move_camera_animation(shots[shot_index].camera_object, -duration)
+    shots.remove(index)
 
 
 def clear_shots():
@@ -111,9 +116,13 @@ def move_shot_up(index: int):
     """Move the shot up the timeline"""
 
     shots = bpy.context.scene.camera_sequencer_shots
+
     if index > 0:
-        previous_index = index - 1
-        shots.move(index, previous_index)
+        new_index = index - 1
+        shots.move(index, new_index)
+        move_camera_animation(camera_object=shots[new_index].camera_object, amount_of_frames=-shots[index].duration)
+        move_camera_animation(camera_object=shots[index].camera_object, amount_of_frames=shots[new_index].duration)
+
         # force update scene camera setting here too
 
 
@@ -121,9 +130,13 @@ def move_shot_down(index: int):
     """Move the shot down the timeline"""
 
     shots = bpy.context.scene.camera_sequencer_shots
+
     if index < len(shots) - 1:
-        next_index = index + 1
-        shots.move(index, next_index)
+        new_index = index + 1
+        shots.move(index, new_index)
+        move_camera_animation(camera_object=shots[new_index].camera_object, amount_of_frames=shots[index].duration)
+        move_camera_animation(camera_object=shots[index].camera_object, amount_of_frames=-shots[new_index].duration)
+
         # force update scene camera setting here too
 
 
@@ -243,3 +256,51 @@ def clean_up_cameras():
     for shot in shots:
         shot.camera_object.name = f'{shot.code}.CAM.001'
         shot.camera_object.data.name = shot.camera_object.name
+
+
+def move_camera_animation(camera_object:bpy.types.Object, amount_of_frames:int):
+    """Move all keyframes in fcurves attached to the camera object and its data"""
+
+    if camera_object.animation_data:
+
+        object_action = camera_object.animation_data.action
+        if object_action:
+            for fcurve in object_action.fcurves:
+                for keyframe in fcurve.keyframe_points:
+                    keyframe.co[0] += amount_of_frames
+                    keyframe.handle_left[0] += amount_of_frames
+                    keyframe.handle_right[0] += amount_of_frames
+
+    if camera_object.data.animation_data:
+
+        data_action = camera_object.data.animation_data.action
+        if data_action:
+            for fcurve in camera_object.data.animation_data.action.fcurves:
+                for keyframe in fcurve.keyframe_points:
+                    keyframe.co[0] += amount_of_frames
+                    keyframe.handle_left[0] += amount_of_frames
+                    keyframe.handle_right[0] += amount_of_frames
+
+
+def change_shot_duration(self, context) -> None:
+    """Move subsequent camera animations, and sync the timeline"""
+
+    # This can probably be much improved.
+
+    # Determine shot index
+    shots = context.scene.camera_sequencer_shots
+    shot_index = None
+    for index, shot in enumerate(shots):
+        if shot == self:
+            shot_index = index
+            break
+
+    # Move camera animation of subsequent shots
+    for index in range(shot_index + 1, len(shots)):
+        duration_change = self.duration - self.previous_duration
+        move_camera_animation(camera_object=shots[index].camera_object, amount_of_frames=duration_change)
+
+    # Update shot's previous duration
+    self.previous_duration = self.duration
+
+    return sync_timeline(self, context)
