@@ -10,3 +10,6 @@ Press the `➕` button to **create a new shot**. It will automatically be linked
 
 ## Navigation
 Use the `◀️` and `▶️` buttons to **skip to shots** in the timeline. Click a shot's name to **jump to that shot**. `🔎` uses Blender's Preview Range to isolate the selected shot during playback.
+
+## Roadmap
+In a separate branch, I'm overhauling the interface to be based on Blender's native Sequencer editor. This would make the addon much more intuitive to use, while also significantly reducing the amount of code while still adding quite a bit of features. I intend to make this the 0.0.2 release.
