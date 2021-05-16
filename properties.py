@@ -19,7 +19,7 @@ else:
 class CameraSequencerSettings(bpy.types.PropertyGroup):
 
     start_frame: bpy.props.IntProperty(name='Start Frame', default=1,
-                                       update=functions.sync_timeline,
+                                       update=functions.change_start_frame,
                                        min=0,
                                        description='Shots should start at this frame',
                                        options=set())

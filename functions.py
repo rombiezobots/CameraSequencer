@@ -304,3 +304,18 @@ def change_shot_duration(self, context) -> None:
     self.previous_duration = self.duration
 
     return sync_timeline(self, context)
+
+
+def change_start_frame(self, context) -> None:
+    """Change the sequence's start frame, and sync the timeline"""
+
+    # Calculate the amount of frames to move any camera animation over,
+    # using the Scene's native starting frame as the old value.
+    old_start_frame = context.scene.frame_start
+    amount_of_frames = self.start_frame - old_start_frame
+
+    # Move all camera animation towards the new starting frame.
+    for shot in context.scene.camera_sequencer_shots:
+        move_camera_animation(camera_object=shot.camera_object, amount_of_frames=amount_of_frames)
+
+    return sync_timeline(self, context)
