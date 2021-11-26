@@ -50,6 +50,7 @@ class Shot(bpy.types.PropertyGroup):
                                              poll=functions.object_must_be_camera)
     notes: bpy.props.StringProperty(name='Notes',
                                     default='')
+    is_collapsed: bpy.props.BoolProperty(default=False)
 
 
 ##############################################################################

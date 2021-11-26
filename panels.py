@@ -49,33 +49,39 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         if len(scene.camera_sequencer_shots) == 0:
             box_shots.label(text='No shots yet.')
         for index, shot in enumerate(scene.camera_sequencer_shots):
+            triangle = 'TRIA_RIGHT' if shot.is_collapsed else 'TRIA_DOWN'
             shot_box = box_shots.box()
-            block_1 = shot_box.column(align=True)
-            block_1_top = block_1.split(factor=0.3, align=True)
-            block_1_top.scale_y = 1.5
-            block_1_top_left = block_1_top.split(factor=0.4, align=True)
-            block_1_top_left.operator('camera_sequencer.isolate_shot',
-                                      text='', icon='VIEWZOOM').index = index
-            block_1_top_left.operator('camera_sequencer.jump_to_specific_shot',
-                                      text=shot.code).index = index
-            block_1_top_right = block_1_top.row(align=True)
-            block_1_top_right.prop(data=shot,
-                                   property='camera_object',
-                                   text='',
-                                   icon='CAMERA_DATA')
-            duration_seconds = shot.duration / scene.render.fps * scene.render.fps_base
-            block_1_top_right.prop(data=shot,
-                                   property='duration',
-                                   text=f'{round(duration_seconds, 2)}s',
-                                   icon='TIME')
-            block_1_bottom = block_1.row(align=True)
-            block_1_bottom.prop(data=shot, property='notes', text='')
-            block_1_bottom.operator('camera_sequencer.move_shot_up',
-                                    icon='TRIA_UP', text='').index = index
-            block_1_bottom.operator('camera_sequencer.move_shot_down',
-                                    icon='TRIA_DOWN', text='').index = index
-            block_1_bottom.operator('camera_sequencer.delete_shot',
-                                    icon='TRASH', text='').index = index
+            col = shot_box.column(align=True)
+            top = col.split(factor=0.3, align=True)
+            top.scale_y = 1 + int(not shot.is_collapsed) * 0.5
+            top_left = top.row(align=True)
+            top_left.prop(shot, 'is_collapsed', icon=triangle, text='',
+                invert_checkbox=True)
+            split = top_left.split(factor=0.5, align=True)
+            split.operator('camera_sequencer.isolate_shot',
+                              text='', icon='VIEWZOOM').index = index
+            split.operator('camera_sequencer.jump_to_specific_shot',
+                              text=shot.code).index = index
+
+            top_right = top.row(align=True)
+            top_right.prop(data=shot,
+                           property='camera_object',
+                           text='',
+                           icon='CAMERA_DATA')
+            len_secs = shot.duration / scene.render.fps * scene.render.fps_base
+            top_right.prop(data=shot,
+                           property='duration',
+                           text=f'{round(len_secs, 2)}s',
+                           icon='TIME')
+            if not shot.is_collapsed:
+                block_bottom = col.row(align=True)
+                block_bottom.prop(data=shot, property='notes', text='')
+                block_bottom.operator('camera_sequencer.move_shot_up',
+                                      icon='TRIA_UP', text='').index = index
+                block_bottom.operator('camera_sequencer.move_shot_down',
+                                      icon='TRIA_DOWN', text='').index = index
+                block_bottom.operator('camera_sequencer.delete_shot',
+                                      icon='TRASH', text='').index = index
 
 
 ##############################################################################
