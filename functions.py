@@ -168,10 +168,25 @@ def new_shot():
     if len(scene.camera_sequencer_shots) == 1:
         scene.camera = camera_object
 
+def on_camera_update(self, context) -> None:
+    update_scene_camera(context)
+    sync_timeline(self, context)
 
 def object_must_be_camera(self, ob):
     return ob.type == 'CAMERA'
 
+def get_shot_from_frame(frame:int):
+    scene = bpy.context.scene
+    counter = scene.frame_start
+    for shot in scene.camera_sequencer_shots.values():
+        if counter <= frame < counter + shot.duration:
+            return shot
+        counter += shot.duration
+    return None
+
+def update_scene_camera(context):
+    current_shot = get_shot_from_frame(frame=context.scene.frame_current)
+    context.scene.camera = current_shot.camera_object
 
 def sync_timeline(self, context) -> None:
     """Sync Blender's timeline and markers with the shot list"""
@@ -191,8 +206,8 @@ def sync_timeline(self, context) -> None:
         scene.frame_end = new_start_frame - 1
     else:
         scene.frame_end = new_start_frame + 100
-    return None  # Required by bpy
 
+    # Find a way to set the current frame to the updated camera's shot's first frame
 
 def setup_metadata_stamping():
     render = bpy.context.scene.render
@@ -222,18 +237,10 @@ def enable_dynamic_metadata_note(scene):
     """Frame change handler to update the Metadata Note with every shot's
     description. Released on file close"""
 
-    # Get current shot
-    counter = scene.frame_start
-    current_shot = None
-    for shot in scene.camera_sequencer_shots.values():
-        if counter <= scene.frame_current < counter + shot.duration:
-            current_shot = shot
-            break
-        counter += shot.duration
-
     # Set RenderSettings.stamp_note_text to the current shot's description
-    if current_shot:
-        camera = current_shot.camera_object.data
+    shot = get_shot_from_frame(frame=scene.frame_current)
+    if shot:
+        camera = shot.camera_object.data
         n = shot.notes
         f = round(camera.lens)
         a = camera.dof.aperture_fstop

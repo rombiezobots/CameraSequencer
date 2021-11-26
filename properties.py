@@ -46,7 +46,7 @@ class Shot(bpy.types.PropertyGroup):
 
     camera_object: bpy.props.PointerProperty(name='Camera',
                                              type=bpy.types.Object,
-                                             update=functions.sync_timeline,
+                                             update=functions.on_camera_update,
                                              poll=functions.object_must_be_camera)
     notes: bpy.props.StringProperty(name='Notes',
                                     default='')
