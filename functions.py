@@ -53,7 +53,9 @@ def clear_shots():
 
     scene = bpy.context.scene
     for shot in scene.camera_sequencer_shots:
-        bpy.data.objects.remove(shot.camera_object)
+        if shot.camera_object:
+            bpy.data.objects.remove(shot.camera_object)
+        # TODO: if the camera is in use in another shot list (another Scene), do not delete it.
     scene.camera_sequencer_shots.clear()
 
 
