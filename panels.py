@@ -21,65 +21,83 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
+
         scene = context.scene
         lay = self.layout
+
         box_settings = lay.box()
         box_settings.use_property_split = True
-        box_settings.prop(scene.camera_sequencer_settings, 'start_frame')
+        box_settings.prop(scene, 'frame_start')
+
         lay.separator()
+
         col = lay.column(align=True)
         sub = col.row(align=True)
         sub.operator('camera_sequencer.new_shot',
-                     icon='ADD', text='')
+                     icon='ADD',
+                     text='')
         sub.operator('camera_sequencer.jump_shots',
-                     icon='TRIA_LEFT', text='').previous = True
+                     icon='TRIA_LEFT',
+                     text='').previous = True
         sub.operator('camera_sequencer.jump_shots',
-                     icon='TRIA_RIGHT', text='').previous = False
+                     icon='TRIA_RIGHT',
+                     text='').previous = False
         sub.operator('camera_sequencer.clear_shots',
-                     icon='X', text='')
-        sub.separator()
-        sub.operator('camera_sequencer.clean_up_cameras',
-                     icon='BRUSH_DATA', text='')
+                     icon='X',
+                     text='')
         sub.separator()
         sub.operator('camera_sequencer.setup_metadata_stamping',
-                     icon='FILE_TEXT', text='')
+                     icon='FILE_TEXT',
+                     text='')
         box_shots = col.box()
-        if len(scene.camera_sequencer_shots) == 0:
-            box_shots.label(text='No shots yet.')
-        for index, shot in enumerate(scene.camera_sequencer_shots):
-            triangle = 'TRIA_RIGHT' if shot.is_collapsed else 'TRIA_DOWN'
+
+        if len(scene.timeline_markers) == 0:
+            box_shots.label(text='The timeline has no markers yet.',
+                            icon='ERROR')
+
+        for index, marker in enumerate(scene.timeline_markers):
+            cs = marker.camera_sequencer
+            triangle = 'TRIA_RIGHT' if cs.is_collapsed else 'TRIA_DOWN'
             shot_box = box_shots.box()
             col = shot_box.column(align=True)
-            top = col.split(factor=0.3, align=True)
-            top.scale_y = 1 + int(not shot.is_collapsed) * 0.5
-            top_left = top.row(align=True)
-            top_left.prop(shot, 'is_collapsed', icon=triangle, text='',
-                invert_checkbox=True)
-            split = top_left.split(factor=0.5, align=True)
-            split.operator('camera_sequencer.isolate_shot',
-                              text='', icon='VIEWZOOM').index = index
-            split.operator('camera_sequencer.jump_to_specific_shot',
-                              text=shot.code).index = index
+            # top = col.split(factor=0.5, align=True)
+            top = col.row(align=True)
+            top.scale_y = 1 + int(not cs.is_collapsed) * 0.5
+            # top_left = top.row(align=True)
+            top.prop(cs,
+                     'is_collapsed',
+                     icon=triangle,
+                     text='',
+                     invert_checkbox=True)
+            top.operator('camera_sequencer.isolate_shot',
+                         text='',
+                         icon='VIEWZOOM').index = index
+            # top_right = top.row(align=True)
+            top.prop(cs, 'name', text='')
+            top.prop(data=marker,
+                     property='camera',
+                     text='',
+                     icon='CAMERA_DATA')
 
-            top_right = top.row(align=True)
-            top_right.prop(data=shot,
-                           property='camera_object',
-                           text='',
-                           icon='CAMERA_DATA')
-            len_secs = shot.duration / scene.render.fps * scene.render.fps_base
-            top_right.prop(data=shot,
-                           property='duration',
-                           text=f'{round(len_secs, 2)}s',
-                           icon='TIME')
-            if not shot.is_collapsed:
+            # Shot duration. NEEDS WORK
+
+            if index == len(scene.timeline_markers) - 1:
+                len_frames = scene.frame_end + 1 - marker.frame
+            else:
+                len_frames = scene.timeline_markers[index +
+                                                    1].frame - marker.frame
+            len_secs = len_frames / scene.render.fps * scene.render.fps_base
+            top.label(text=f'{round(len_secs, 2)}s',
+                      icon='TIME')
+
+            if not cs.is_collapsed:
                 block_bottom = col.row(align=True)
-                block_bottom.prop(data=shot, property='notes', text='')
-                block_bottom.operator('camera_sequencer.move_shot_up',
-                                      icon='TRIA_UP', text='').index = index
-                block_bottom.operator('camera_sequencer.move_shot_down',
-                                      icon='TRIA_DOWN', text='').index = index
+                block_bottom.prop(data=cs,
+                                  property='notes',
+                                  text='')
                 block_bottom.operator('camera_sequencer.delete_shot',
-                                      icon='TRASH', text='').index = index
+                                      icon='TRASH',
+                                      text='').index = index
 
 
 ##############################################################################
