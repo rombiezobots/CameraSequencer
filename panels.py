@@ -1,18 +1,18 @@
-##############################################################################
+########################################################################################################################
 # Imports
-##############################################################################
+########################################################################################################################
 
 
 import bpy
+from . import common
 
 
-##############################################################################
+########################################################################################################################
 # Panels
-##############################################################################
+########################################################################################################################
 
 
 class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
-
     bl_context = 'scene'
     bl_idname = 'PROPERTIES_PT_camera_sequencer'
     bl_label = 'Camera Sequencer'
@@ -21,90 +21,71 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     bl_options = {'DEFAULT_CLOSED'}
 
     def draw(self, context):
-
         scene = context.scene
+        markers = common.markers_chronological()
         lay = self.layout
 
+        # Scene-wide settings. These are native Blender properties of the current Scene, drawn here for convenience.
         box_settings = lay.box()
         box_settings.use_property_split = True
-        box_settings.prop(scene, 'frame_start')
+        col = box_settings.column(align=True)
+        col.prop(scene, 'frame_start')
+        col.prop(scene, 'frame_end')
 
         lay.separator()
 
-        col = lay.column(align=True)
-        sub = col.row(align=True)
-        sub.operator('camera_sequencer.new_shot',
-                     icon='ADD',
-                     text='')
-        sub.operator('camera_sequencer.jump_shots',
-                     icon='TRIA_LEFT',
-                     text='').previous = True
-        sub.operator('camera_sequencer.jump_shots',
-                     icon='TRIA_RIGHT',
-                     text='').previous = False
-        sub.operator('camera_sequencer.clear_shots',
-                     icon='X',
-                     text='')
-        sub.separator()
-        sub.operator('camera_sequencer.setup_metadata_stamping',
-                     icon='FILE_TEXT',
-                     text='')
-        box_shots = col.box()
+        # Draw a column with align=True to glue the toolbar to the top of the shot list frame.
+        col_main = lay.column(align=True)
 
+        # Toolbar.
+        toolbar = col_main.row(align=True)
+        toolbar.operator('camera_sequencer.jump_shots', icon='TRIA_LEFT', text='').previous = True
+        toolbar.operator('camera_sequencer.jump_shots', icon='TRIA_RIGHT', text='').previous = False
+        toolbar.operator('camera_sequencer.clear_shots', icon='X', text='')
+        toolbar.separator()
+        toolbar.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT', text='')
+
+        # Shot list frame.
+        box_shotlist = col_main.box()
+
+        # Warning cases.
         if len(scene.timeline_markers) == 0:
-            box_shots.label(text='The timeline has no markers yet.',
-                            icon='ERROR')
+            box_shotlist.label(text='The timeline has no markers yet.', icon='ERROR')
+        elif markers[0].frame != context.scene.frame_start:
+            box_shotlist.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
 
-        for index, marker in enumerate(scene.timeline_markers):
-            cs = marker.camera_sequencer
-            triangle = 'TRIA_RIGHT' if cs.is_collapsed else 'TRIA_DOWN'
-            shot_box = box_shots.box()
-            col = shot_box.column(align=True)
-            # top = col.split(factor=0.5, align=True)
-            top = col.row(align=True)
-            top.scale_y = 1 + int(not cs.is_collapsed) * 0.5
-            # top_left = top.row(align=True)
-            top.prop(cs,
-                     'is_collapsed',
-                     icon=triangle,
-                     text='',
-                     invert_checkbox=True)
-            top.operator('camera_sequencer.isolate_shot',
-                         text='',
-                         icon='VIEWZOOM').index = index
-            # top_right = top.row(align=True)
-            top.prop(cs, 'name', text='')
-            top.prop(data=marker,
-                     property='camera',
-                     text='',
-                     icon='CAMERA_DATA')
+        # Shot list.
+        for marker in markers:
+            # Frame and main column.
+            box_shot = box_shotlist.box()
+            col_main = box_shot.column(align=True)
 
-            # Shot duration. NEEDS WORK
+            # Top row. Toggle collapse, isolate shot, shot name, and the assigned camera.
+            row_top = col_main.row(align=True)
+            triangle = 'TRIA_RIGHT' if marker.camera_sequencer.is_collapsed else 'TRIA_DOWN'
+            row_top.prop(marker.camera_sequencer, 'is_collapsed', icon=triangle, text='', invert_checkbox=True)
+            row_top.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            row_top.prop(marker.camera_sequencer, 'name', text='')
+            row_top.prop(marker, 'camera', text='', icon='CAMERA_DATA')
 
-            if index == len(scene.timeline_markers) - 1:
-                len_frames = scene.frame_end + 1 - marker.frame
-            else:
-                len_frames = scene.timeline_markers[index +
-                                                    1].frame - marker.frame
-            len_secs = len_frames / scene.render.fps * scene.render.fps_base
-            top.label(text=f'{round(len_secs, 2)}s',
-                      icon='TIME')
+            if not marker.camera_sequencer.is_collapsed:
+                # Shot notes / description.
+                col_main.prop(data=marker.camera_sequencer, property='notes', text='')
 
-            if not cs.is_collapsed:
-                block_bottom = col.row(align=True)
-                block_bottom.prop(data=cs,
-                                  property='notes',
-                                  text='')
-                block_bottom.operator('camera_sequencer.delete_shot',
-                                      icon='TRASH',
-                                      text='').index = index
+                # Bottom row. Shot duration.
+                if marker == markers[-1]:
+                    len_frames = scene.frame_end + 1 - marker.frame
+                else:
+                    index_next = markers.index(marker) + 1
+                    len_frames = markers[index_next].frame - marker.frame
+                len_secs = len_frames / scene.render.fps * scene.render.fps_base
+                box_bottom = col_main.box()
+                box_bottom.label(text=f'{len_frames} frames = {round(len_secs, 2)} seconds', icon='TIME')
 
 
-##############################################################################
+########################################################################################################################
 # Registration
-##############################################################################
+########################################################################################################################
 
 
-register, unregister = bpy.utils.register_classes_factory([
-    PROPERTIES_PT_camera_sequencer
-])
+register, unregister = bpy.utils.register_classes_factory([PROPERTIES_PT_camera_sequencer])
