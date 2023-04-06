@@ -70,7 +70,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             triangle = 'TRIA_RIGHT' if marker.camera_sequencer.is_collapsed else 'TRIA_DOWN'
             row_top.prop(marker.camera_sequencer, 'is_collapsed', icon=triangle, text='', invert_checkbox=True)
             row_top.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM').marker_frame = marker.frame
-            row_top.prop(marker.camera_sequencer, 'name', text='')
+            row_top.prop(marker, 'name', text='')
             row_top.prop(marker, 'camera', text='', icon='CAMERA_DATA')
 
             if not marker.camera_sequencer.is_collapsed:

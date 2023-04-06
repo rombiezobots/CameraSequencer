@@ -12,7 +12,6 @@ import bpy
 
 
 class TimelineMarkerProperties(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(name='Name', default='Shot')
     notes: bpy.props.StringProperty(name='Notes', default='This shot has no description yet.')
     is_collapsed: bpy.props.BoolProperty(default=False)
 
