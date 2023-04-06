@@ -3,8 +3,13 @@
 ########################################################################################################################
 
 
-import bpy
-from . import common
+if 'bpy' in locals():
+    import importlib
+
+    common = importlib.reload(common)
+else:
+    import bpy
+    from . import common
 
 
 ########################################################################################################################
@@ -39,8 +44,8 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
 
         # Toolbar.
         toolbar = col_main.row(align=True)
-        toolbar.operator('camera_sequencer.jump_shots', icon='TRIA_LEFT', text='').previous = True
-        toolbar.operator('camera_sequencer.jump_shots', icon='TRIA_RIGHT', text='').previous = False
+        toolbar.operator('camera_sequencer.skip_shots', icon='TRIA_LEFT', text='').previous = True
+        toolbar.operator('camera_sequencer.skip_shots', icon='TRIA_RIGHT', text='').previous = False
         toolbar.operator('camera_sequencer.clear_shots', icon='X', text='')
         toolbar.separator()
         toolbar.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT', text='')
@@ -64,7 +69,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             row_top = col_main.row(align=True)
             triangle = 'TRIA_RIGHT' if marker.camera_sequencer.is_collapsed else 'TRIA_DOWN'
             row_top.prop(marker.camera_sequencer, 'is_collapsed', icon=triangle, text='', invert_checkbox=True)
-            row_top.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            row_top.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM').marker_frame = marker.frame
             row_top.prop(marker.camera_sequencer, 'name', text='')
             row_top.prop(marker, 'camera', text='', icon='CAMERA_DATA')
 
@@ -73,11 +78,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
                 col_main.prop(data=marker.camera_sequencer, property='notes', text='')
 
                 # Bottom row. Shot duration.
-                if marker == markers[-1]:
-                    len_frames = scene.frame_end + 1 - marker.frame
-                else:
-                    index_next = markers.index(marker) + 1
-                    len_frames = markers[index_next].frame - marker.frame
+                len_frames = common.shot_duration(marker=marker)
                 len_secs = len_frames / scene.render.fps * scene.render.fps_base
                 box_bottom = col_main.box()
                 box_bottom.label(text=f'{len_frames} frames = {round(len_secs, 2)} seconds', icon='TIME')
