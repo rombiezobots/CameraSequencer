@@ -37,21 +37,11 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         col.prop(scene, 'frame_start')
         col.prop(scene, 'frame_end')
 
-        lay.separator()
-
-        # Draw a column with align=True to glue the toolbar to the top of the shot list frame.
-        col_main = lay.column(align=True)
-
-        # Toolbar.
-        toolbar = col_main.row(align=True)
-        toolbar.operator('camera_sequencer.skip_shots', icon='TRIA_LEFT', text='').previous = True
-        toolbar.operator('camera_sequencer.skip_shots', icon='TRIA_RIGHT', text='').previous = False
-        toolbar.operator('camera_sequencer.clear_shots', icon='X', text='')
-        toolbar.separator()
-        toolbar.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT', text='')
+        # Dynamic Note
+        lay.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT')
 
         # Shot list frame.
-        box_shotlist = col_main.box()
+        box_shotlist = lay.box()
 
         # Warning cases.
         if len(scene.timeline_markers) == 0:

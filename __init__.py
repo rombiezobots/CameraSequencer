@@ -6,14 +6,16 @@
 if 'bpy' in locals():
     import importlib
 
-    properties = importlib.reload(properties)
     operators = importlib.reload(operators)
     panels = importlib.reload(panels)
+    properties = importlib.reload(properties)
+    ui = importlib.reload(ui)
 else:
     import bpy
-    from . import properties
     from . import operators
     from . import panels
+    from . import properties
+    from . import ui
 
 
 ########################################################################################################################
@@ -37,7 +39,7 @@ bl_info = {
 ########################################################################################################################
 
 
-modules = [properties, operators, panels]
+modules = [properties, operators, panels, ui]
 
 
 def register():
