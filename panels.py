@@ -40,38 +40,35 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         # Dynamic Note
         lay.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT')
 
-        # Shot list frame.
-        box_shotlist = lay.box()
-
         # Warning cases.
         if len(scene.timeline_markers) == 0:
-            box_shotlist.label(text='The timeline has no markers yet.', icon='ERROR')
+            lay.label(text='The timeline has no markers yet.', icon='ERROR')
         elif markers[0].frame != context.scene.frame_start:
-            box_shotlist.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
+            lay.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
 
         # Shot list.
+        # First create a dict to not lose the panel references.
+        panels = {}
         for marker in markers:
-            # Frame and main column.
-            box_shot = box_shotlist.box()
-            col_main = box_shot.column(align=True)
+            panels[marker.name] = lay.panel_prop(marker.camera_sequencer, 'is_collapsed')
 
             # Top row. Toggle collapse, isolate shot, shot name, and the assigned camera.
-            row_top = col_main.row(align=True)
-            triangle = 'TRIA_RIGHT' if marker.camera_sequencer.is_collapsed else 'TRIA_DOWN'
-            row_top.prop(marker.camera_sequencer, 'is_collapsed', icon=triangle, text='', invert_checkbox=True)
-            row_top.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM').marker_frame = marker.frame
-            row_top.prop(marker, 'name', text='')
-            row_top.prop(marker, 'camera', text='', icon='CAMERA_DATA')
+            row_header = panels[marker.name][0].row(align=True)
+            isolate_shot = row_header.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            isolate_shot.marker_frame = marker.frame
+            row_header.prop(marker, 'name', text='')
+            row_header.prop(marker, 'camera', text='', icon='CAMERA_DATA')
 
-            if not marker.camera_sequencer.is_collapsed:
-                # Shot notes / description.
-                col_main.prop(data=marker.camera_sequencer, property='notes', text='')
-
-                # Bottom row. Shot duration.
+            # Shot notes / description.
+            if panels[marker.name][1]:
+                col_body = panels[marker.name][1].column(align=True)
+                col_body.prop(data=marker.camera_sequencer, property='notes', text='')
                 len_frames = common.shot_duration(marker=marker)
                 len_secs = len_frames / scene.render.fps * scene.render.fps_base
-                box_bottom = col_main.box()
-                box_bottom.label(text=f'{len_frames} frames = {round(len_secs, 2)} seconds', icon='TIME')
+                box = col_body.box()
+                row_time = box.row()
+                row_time.label(text=f'{len_frames} frames', icon='PREVIEW_RANGE')
+                row_time.label(text=f'{round(len_secs, 2)} seconds')
 
 
 ########################################################################################################################
