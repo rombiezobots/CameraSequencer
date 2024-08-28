@@ -33,13 +33,18 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         # Scene-wide settings. These are native Blender properties of the current Scene, drawn here for convenience.
         box_settings = lay.box()
         box_settings.use_property_split = True
+        box_settings.use_property_decorate = False
         col = box_settings.column(align=True)
         col.prop(scene, 'frame_start')
         col.prop(scene, 'frame_end')
+        col = box_settings.column(align=True)
+        col.prop(scene.render, 'use_stamp', text='Burn Metadata Into Image')
+        col.prop(scene.render, 'use_stamp_marker', text='Include Marker Description')
+        col.prop(scene.render, 'use_stamp_frame_range', text='Include Frame Range')
+        col.prop(scene.render, 'use_stamp_camera', text='Include Camera Name')
 
         # Dynamic Note
-        lay.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT')
-        lay.operator('camera_sequencer.notes_to_marker_name')
+        lay.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
 
         # Warning cases.
         if len(scene.timeline_markers) == 0:

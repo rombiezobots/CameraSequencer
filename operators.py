@@ -77,18 +77,6 @@ class CAMERASEQUENCER_OT_isolate_shot(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CAMERASEQUENCER_OT_setup_metadata_stamping(bpy.types.Operator):
-    '''Enable a handler that dynamically changes the Metadata Note with every shot's description.\nReleased on file close'''
-
-    bl_idname = 'camera_sequencer.setup_metadata_stamping'
-    bl_label = 'Enable Dynamic Note'
-    bl_options = {'UNDO'}
-
-    def execute(self, context):
-        bpy.app.handlers.frame_change_pre.append(functions.enable_dynamic_metadata_note)
-        return {'FINISHED'}
-
-
 ########################################################################################################################
 # Registration
 ########################################################################################################################
@@ -99,6 +87,5 @@ register, unregister = bpy.utils.register_classes_factory(
         CAMERASEQUENCER_OT_notes_to_marker_name,
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
-        CAMERASEQUENCER_OT_setup_metadata_stamping,
     ]
 )
