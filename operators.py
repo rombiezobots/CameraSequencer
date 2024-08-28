@@ -17,6 +17,19 @@ else:
 ########################################################################################################################
 
 
+class CAMERASEQUENCER_OT_notes_to_marker_name(bpy.types.Operator):
+    '''(temporary) Copy old Notes property value to the native marker name'''
+
+    bl_idname = 'camera_sequencer.notes_to_marker_name'
+    bl_label = 'Notes to Marker Name'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        for m in context.scene.timeline_markers:
+            m.name = m.camera_sequencer.notes
+        return {'FINISHED'}
+
+
 class CAMERASEQUENCER_OT_clear_shots(bpy.types.Operator):
     '''Delete all markers from the timeline'''
 
@@ -83,6 +96,7 @@ class CAMERASEQUENCER_OT_setup_metadata_stamping(bpy.types.Operator):
 
 register, unregister = bpy.utils.register_classes_factory(
     [
+        CAMERASEQUENCER_OT_notes_to_marker_name,
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
         CAMERASEQUENCER_OT_setup_metadata_stamping,

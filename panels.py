@@ -39,6 +39,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
 
         # Dynamic Note
         lay.operator('camera_sequencer.setup_metadata_stamping', icon='FILE_TEXT')
+        lay.operator('camera_sequencer.notes_to_marker_name')
 
         # Warning cases.
         if len(scene.timeline_markers) == 0:
