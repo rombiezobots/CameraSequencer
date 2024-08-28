@@ -46,29 +46,21 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         elif markers[0].frame != context.scene.frame_start:
             lay.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
 
+        grid = lay.grid_flow(row_major=True, columns=6, align=True, even_columns=True)
+
         # Shot list.
-        # First create a dict to not lose the panel references.
-        panels = {}
         for marker in markers:
-            panels[marker.name] = lay.panel_prop(marker.camera_sequencer, 'is_collapsed')
 
-            # Top row. Toggle collapse, isolate shot, shot name, and the assigned camera.
-            row_header = panels[marker.name][0].row(align=True)
-            isolate_shot = row_header.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            dur = common.shot_duration(marker=marker)
+            dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
+
+            grid.label(text=str(marker.frame))
+            grid.label(text=f'{dur} f')
+            grid.label(text=f'{dur_secs} s')
+            grid.prop(marker, 'name', text='')
+            grid.prop(marker, 'camera', text='', icon='CAMERA_DATA')
+            isolate_shot = grid.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
             isolate_shot.marker_frame = marker.frame
-            row_header.prop(marker, 'name', text='')
-            row_header.prop(marker, 'camera', text='', icon='CAMERA_DATA')
-
-            # Shot notes / description.
-            if panels[marker.name][1]:
-                col_body = panels[marker.name][1].column(align=True)
-                col_body.prop(data=marker.camera_sequencer, property='notes', text='')
-                len_frames = common.shot_duration(marker=marker)
-                len_secs = len_frames / scene.render.fps * scene.render.fps_base
-                box = col_body.box()
-                row_time = box.row()
-                row_time.label(text=f'{len_frames} frames', icon='PREVIEW_RANGE')
-                row_time.label(text=f'{round(len_secs, 2)} seconds')
 
 
 ########################################################################################################################
