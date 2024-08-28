@@ -47,21 +47,26 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         elif markers[0].frame != context.scene.frame_start:
             lay.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
 
-        grid = lay.grid_flow(row_major=True, columns=6, align=True, even_columns=True)
+        grid = lay.grid_flow(row_major=True, columns=6, even_columns=False, align=True)
 
         # Shot list.
         for marker in markers:
 
+            end_frame = (
+                next(m for m in markers if m.frame > marker.frame).frame - 1
+                if marker != markers[-1]
+                else context.scene.frame_end
+            )
             dur = common.shot_duration(marker=marker)
             dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
 
-            grid.label(text=str(marker.frame))
-            grid.label(text=f'{dur} f')
-            grid.label(text=f'{dur_secs} s')
-            grid.prop(marker, 'name', text='')
-            grid.prop(marker, 'camera', text='', icon='CAMERA_DATA')
             isolate_shot = grid.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
             isolate_shot.marker_frame = marker.frame
+            grid.prop(marker, 'name', text='')
+            grid.prop(marker, 'camera', text='', expand=True, icon='CAMERA_DATA')
+            grid.label(text=f'{marker.frame} - {end_frame}')
+            grid.label(text=f'{dur} f')
+            grid.label(text=f'{dur_secs} s')
 
 
 ########################################################################################################################
