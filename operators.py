@@ -64,26 +64,6 @@ class CAMERASEQUENCER_OT_isolate_shot(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CAMERASEQUENCER_OT_skip_shots(bpy.types.Operator):
-    '''Skip shots in the timeline'''
-
-    bl_idname = 'camera_sequencer.skip_shots'
-    bl_label = 'Skip Shots'
-    previous: bpy.props.BoolProperty(default=False)
-
-    def execute(self, context):
-        markers = common.markers_chronological()
-        if self.previous:
-            # Go to the marker with the highest frame number smaller than the current frame.
-            marker = next((m for m in reversed(markers) if m.frame < context.scene.frame_current), None)
-            context.scene.frame_set(context.scene.frame_start if not marker else marker.frame)
-        else:
-            # Go to the marker with the lowest frame number higher than the current frame.
-            marker = next((m for m in markers if m.frame > context.scene.frame_current), None)
-            context.scene.frame_set(context.scene.frame_end if not marker else marker.frame)
-        return {'FINISHED'}
-
-
 class CAMERASEQUENCER_OT_setup_metadata_stamping(bpy.types.Operator):
     '''Enable a handler that dynamically changes the Metadata Note with every shot's description.\nReleased on file close'''
 
@@ -105,7 +85,6 @@ register, unregister = bpy.utils.register_classes_factory(
     [
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
-        CAMERASEQUENCER_OT_skip_shots,
         CAMERASEQUENCER_OT_setup_metadata_stamping,
     ]
 )

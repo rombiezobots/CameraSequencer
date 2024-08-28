@@ -16,10 +16,10 @@ def camera_sequencer_ui(self, context):
     row.separator()
     row.label(text='Camera Sequencer')
     sub = row.row(align=True)
-    prev = sub.operator('camera_sequencer.skip_shots', icon='FRAME_PREV', text='')
-    prev.previous = True
-    next = sub.operator('camera_sequencer.skip_shots', icon='FRAME_NEXT', text='')
-    next.previous = False
+    prev = sub.operator('screen.marker_jump', icon='FRAME_PREV', text='')
+    prev.next = False
+    next = sub.operator('screen.marker_jump', icon='FRAME_NEXT', text='')
+    next.next = True
     sub.operator('camera_sequencer.clear_shots', icon='X', text='')
 
 
