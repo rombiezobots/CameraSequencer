@@ -25,6 +25,14 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
     bl_space_type = 'PROPERTIES'
     bl_options = {'DEFAULT_CLOSED'}
 
+    def _get_warnings(self, scene):
+        warnings = []
+        if len(scene.timeline_markers) == 0:
+            warnings.append('The timeline has no markers yet.')
+        elif common.markers_chronological()[0].frame != scene.frame_start:
+            warnings.append('The first shot does not start on the timeline\'s first frame.')
+            return warnings
+
     def draw(self, context):
         scene = context.scene
         markers = common.markers_chronological()
@@ -43,18 +51,22 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         col.prop(scene.render, 'use_stamp_frame_range', text='Include Frame Range')
         col.prop(scene.render, 'use_stamp_camera', text='Include Camera Name')
 
-        # Dynamic Note
-        lay.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
+        # Utilities.
+        box_utils = lay.box()
+        grid_utils = box_utils.grid_flow(columns=2, even_columns=True, align=True)
+        grid_utils.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
 
-        # Warning cases.
-        if len(scene.timeline_markers) == 0:
-            lay.label(text='The timeline has no markers yet.', icon='ERROR')
-        elif markers[0].frame != context.scene.frame_start:
-            lay.label(text='The first shot does not start on the timeline\'s first frame.', icon='ERROR')
-
-        grid = lay.grid_flow(row_major=True, columns=6, even_columns=False, align=True)
+        # Warnings.
+        warnings = self._get_warnings(scene=scene)
+        if warnings:
+            box_warnings = lay.box()
+            for warning in warnings:
+                box_warnings.label(text=warning, icon='ERROR')
 
         # Shot list.
+        box_markers = lay.box()
+        grid_markers = box_markers.grid_flow(row_major=True, columns=6, even_columns=False, align=True)
+
         for marker in markers:
 
             end_frame = (
@@ -65,13 +77,13 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             dur = common.shot_duration(marker=marker)
             dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
 
-            isolate_shot = grid.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            isolate_shot = grid_markers.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
             isolate_shot.marker_frame = marker.frame
-            grid.prop(marker, 'name', text='')
-            grid.prop(marker, 'camera', text='', expand=True, icon='CAMERA_DATA')
-            grid.label(text=f'{marker.frame} - {end_frame}')
-            grid.label(text=f'{dur} f')
-            grid.label(text=f'{dur_secs} s')
+            grid_markers.prop(marker, 'name', text='')
+            grid_markers.prop(marker, 'camera', text='', expand=True, icon='CAMERA_DATA')
+            grid_markers.label(text=f'{marker.frame} - {end_frame}')
+            grid_markers.label(text=f'{dur} f')
+            grid_markers.label(text=f'{dur_secs} s')
 
 
 ########################################################################################################################
