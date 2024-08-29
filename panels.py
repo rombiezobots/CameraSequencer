@@ -58,8 +58,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
 
         # Utilities.
         row_utils = col_shotlist.row(align=True)
-        row_utils.operator('camera_sequencer.set_render_range')
-        row_utils.operator('camera_sequencer.reset_render_range')
+        row_utils.operator_menu_enum('camera_sequencer.set_frame_range', 'method')
         row_utils.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
 
         # Warnings.

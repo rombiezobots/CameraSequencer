@@ -30,33 +30,53 @@ class CAMERASEQUENCER_OT_notes_to_marker_name(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CAMERASEQUENCER_OT_set_render_range(bpy.types.Operator):
-    '''Set the render frame range to encompass the selected shots'''
+class CAMERASEQUENCER_OT_set_frame_range(bpy.types.Operator):
+    '''Set frame ranges'''
 
-    bl_idname = 'camera_sequencer.set_render_range'
-    bl_label = 'Set Render Range'
+    bl_idname = 'camera_sequencer.set_frame_range'
+    bl_label = 'Set Frame Range'
     bl_options = {'UNDO'}
 
+    method: bpy.props.EnumProperty(
+        name='Method',
+        items=[
+            (
+                'SELECTED_SHOTS',
+                'Trim Render Range to Selected Shots',
+                'Trim the scene\'s render range to encompass all selected shots',
+            ),
+            (
+                'TARGET_RANGE',
+                'Set Target Range to Render Range',
+                'Set the target range to the scene\'s current render range',
+            ),
+            (
+                'RENDER_RANGE',
+                'Reset Render Range to Target Range',
+                'Reset the scene\'s render range to the target range',
+            ),
+        ],
+    )
+
     def execute(self, context):
+
         markers_chronological = common.markers_chronological()
-        first_shot = next(m for m in markers_chronological if m.select)
-        *_, last_shot = (m for m in markers_chronological if m.select)
-        last_frame = common.shot_frame_last(marker=last_shot)
-        context.scene.frame_start = first_shot.frame
-        context.scene.frame_end = last_frame
-        return {'FINISHED'}
 
+        if self.method == 'SELECTED_SHOTS':
+            first_shot = next(m for m in markers_chronological if m.select)
+            *_, last_shot = (m for m in markers_chronological if m.select)
+            last_frame = common.shot_frame_last(marker=last_shot)
+            context.scene.frame_start = first_shot.frame
+            context.scene.frame_end = last_frame
 
-class CAMERASEQUENCER_OT_reset_render_range(bpy.types.Operator):
-    '''Reset the render frame range to the target frame range'''
+        elif self.method == 'TARGET_RANGE':
+            context.scene.camera_sequencer.frame_start = context.scene.frame_start
+            context.scene.camera_sequencer.frame_end = context.scene.frame_end
 
-    bl_idname = 'camera_sequencer.reset_render_range'
-    bl_label = 'Reset Render Range'
-    bl_options = {'UNDO'}
+        elif self.method == 'RENDER_RANGE':  # Reset
+            context.scene.frame_start = context.scene.camera_sequencer.frame_start
+            context.scene.frame_end = context.scene.camera_sequencer.frame_end
 
-    def execute(self, context):
-        context.scene.frame_start = context.scene.camera_sequencer.frame_start
-        context.scene.frame_end = context.scene.camera_sequencer.frame_end
         return {'FINISHED'}
 
 
@@ -115,8 +135,7 @@ class CAMERASEQUENCER_OT_isolate_shot(bpy.types.Operator):
 register, unregister = bpy.utils.register_classes_factory(
     [
         CAMERASEQUENCER_OT_notes_to_marker_name,
-        CAMERASEQUENCER_OT_set_render_range,
-        CAMERASEQUENCER_OT_reset_render_range,
+        CAMERASEQUENCER_OT_set_frame_range,
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
     ]
