@@ -60,22 +60,6 @@ class CAMERASEQUENCER_OT_reset_render_range(bpy.types.Operator):
         return {'FINISHED'}
 
 
-class CAMERASEQUENCER_OT_toggle_select_all(bpy.types.Operator):
-    '''Set the render frame range to encompass the selected shots'''
-
-    bl_idname = 'camera_sequencer.toggle_select_all'
-    bl_label = 'Select All'
-    bl_options = {'UNDO'}
-
-    deselect: bpy.props.BoolProperty(name='Deselect', default=False)
-
-    def execute(self, context):
-        markers_chronological = common.markers_chronological()
-        for m in markers_chronological:
-            m.select = not self.deselect
-        return {'FINISHED'}
-
-
 class CAMERASEQUENCER_OT_clear_shots(bpy.types.Operator):
     '''Delete all markers from the timeline'''
 
@@ -133,7 +117,6 @@ register, unregister = bpy.utils.register_classes_factory(
         CAMERASEQUENCER_OT_notes_to_marker_name,
         CAMERASEQUENCER_OT_set_render_range,
         CAMERASEQUENCER_OT_reset_render_range,
-        CAMERASEQUENCER_OT_toggle_select_all,
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
     ]
