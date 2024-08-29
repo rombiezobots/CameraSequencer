@@ -27,9 +27,14 @@ def markers_chronological():
     return sorted(bpy.context.scene.timeline_markers, key=attrgetter('frame'))
 
 
-def shot_duration(marker: bpy.types.TimelineMarker) -> int:
+def shot_frame_last(marker: bpy.types.TimelineMarker) -> int:
     markers = markers_chronological()
     if marker == markers[-1]:
-        return bpy.context.scene.frame_end + 1 - marker.frame
+        return bpy.context.scene.camera_sequencer.frame_end
     index_next = markers.index(marker) + 1
-    return markers[index_next].frame - marker.frame
+    return markers[index_next].frame - 1
+
+
+def shot_duration(marker: bpy.types.TimelineMarker) -> int:
+    frame_last = shot_frame_last(marker=marker)
+    return frame_last + 1 - marker.frame

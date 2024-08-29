@@ -30,6 +30,52 @@ class CAMERASEQUENCER_OT_notes_to_marker_name(bpy.types.Operator):
         return {'FINISHED'}
 
 
+class CAMERASEQUENCER_OT_set_render_range(bpy.types.Operator):
+    '''Set the render frame range to encompass the selected shots'''
+
+    bl_idname = 'camera_sequencer.set_render_range'
+    bl_label = 'Set Render Range to Selected'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        markers_chronological = common.markers_chronological()
+        first_shot = next(m for m in markers_chronological if m.select)
+        *_, last_shot = (m for m in markers_chronological if m.select)
+        last_frame = common.shot_frame_last(marker=last_shot)
+        context.scene.frame_start = first_shot.frame
+        context.scene.frame_end = last_frame
+        return {'FINISHED'}
+
+
+class CAMERASEQUENCER_OT_reset_render_range(bpy.types.Operator):
+    '''Reset the render frame range to the target frame range'''
+
+    bl_idname = 'camera_sequencer.reset_render_range'
+    bl_label = 'Reset Render Range'
+    bl_options = {'UNDO'}
+
+    def execute(self, context):
+        context.scene.frame_start = context.scene.camera_sequencer.frame_start
+        context.scene.frame_end = context.scene.camera_sequencer.frame_end
+        return {'FINISHED'}
+
+
+class CAMERASEQUENCER_OT_toggle_select_all(bpy.types.Operator):
+    '''Set the render frame range to encompass the selected shots'''
+
+    bl_idname = 'camera_sequencer.toggle_select_all'
+    bl_label = 'Select All'
+    bl_options = {'UNDO'}
+
+    deselect: bpy.props.BoolProperty(name='Deselect', default=False)
+
+    def execute(self, context):
+        markers_chronological = common.markers_chronological()
+        for m in markers_chronological:
+            m.select = not self.deselect
+        return {'FINISHED'}
+
+
 class CAMERASEQUENCER_OT_clear_shots(bpy.types.Operator):
     '''Delete all markers from the timeline'''
 
@@ -85,6 +131,9 @@ class CAMERASEQUENCER_OT_isolate_shot(bpy.types.Operator):
 register, unregister = bpy.utils.register_classes_factory(
     [
         CAMERASEQUENCER_OT_notes_to_marker_name,
+        CAMERASEQUENCER_OT_set_render_range,
+        CAMERASEQUENCER_OT_reset_render_range,
+        CAMERASEQUENCER_OT_toggle_select_all,
         CAMERASEQUENCER_OT_clear_shots,
         CAMERASEQUENCER_OT_isolate_shot,
     ]
