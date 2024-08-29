@@ -37,11 +37,11 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         scene = context.scene
         markers = common.markers_chronological()
         lay = self.layout
+        lay.use_property_decorate = False
 
         # Scene-wide settings.
         box_settings = lay.box()
         box_settings.use_property_split = True
-        box_settings.use_property_decorate = False
         target_frame_range = box_settings.column(align=True)
         target_frame_range.prop(scene.camera_sequencer, 'frame_start')
         target_frame_range.prop(scene.camera_sequencer, 'frame_end')
@@ -54,16 +54,13 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         metadata.prop(scene.render, 'use_stamp_frame_range', text='Include Frame Range')
         metadata.prop(scene.render, 'use_stamp_camera', text='Include Camera Name')
 
+        col_shotlist = lay.column(align=True)
+
         # Utilities.
-        box_utils = lay.box()
-        grid_utils = box_utils.grid_flow(row_major=True, columns=2, even_columns=True, align=True)
-        grid_utils.operator('camera_sequencer.set_render_range')
-        grid_utils.operator('camera_sequencer.reset_render_range')
-        select_all = grid_utils.operator('camera_sequencer.toggle_select_all')
-        select_all.deselect = False
-        select_none = grid_utils.operator('camera_sequencer.toggle_select_all', text='Select None')
-        select_none.deselect = True
-        grid_utils.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
+        row_utils = col_shotlist.row(align=True)
+        row_utils.operator('camera_sequencer.set_render_range')
+        row_utils.operator('camera_sequencer.reset_render_range')
+        row_utils.operator('camera_sequencer.notes_to_marker_name', icon='FILE_TEXT')
 
         # Warnings.
         warnings = self._get_warnings(scene=scene)
@@ -73,9 +70,8 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
                 box_warnings.label(text=warning, icon='ERROR')
 
         # Shot list.
-        box_markers = lay.box()
-        grid_markers = box_markers.grid_flow(row_major=True, columns=7, even_columns=False)
-
+        box_shot_list = col_shotlist.box()
+        panels = {}  # Keep a reference to all shot panels
         for marker in markers:
 
             end_frame = (
@@ -86,14 +82,31 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             dur = common.shot_duration(marker=marker)
             dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
 
-            grid_markers.prop(marker, 'select', text='')
-            isolate_shot = grid_markers.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
+            panels[marker.name] = box_shot_list.panel_prop(marker.camera_sequencer, 'is_panel_open')
+
+            row_header = panels[marker.name][0].row()
+
+            split_header = row_header.split(factor=0.55)
+
+            row_name_select = split_header.row(align=True)
+            row_name_select.prop(marker, 'select', text='')
+            row_name_select.prop(marker, 'name', text='')
+
+            split_time = split_header.split(factor=0.45)
+
+            split_time.label(text=f'{marker.frame}-{end_frame}')
+
+            row_durations = split_time.split(factor=0.45)
+            row_durations.label(text=f'{dur} f')
+            row_durations.label(text=f'{dur_secs} s')
+
+            isolate_shot = row_header.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
             isolate_shot.marker_frame = marker.frame
-            grid_markers.prop(marker, 'name', text='')
-            grid_markers.prop(marker, 'camera', text='', expand=True, icon='CAMERA_DATA')
-            grid_markers.label(text=f'{marker.frame} - {end_frame}')
-            grid_markers.label(text=f'{dur} f')
-            grid_markers.label(text=f'{dur_secs} s')
+
+            if panels[marker.name][1]:
+                row = panels[marker.name][1].row(align=True)
+                row.use_property_split = True
+                row.prop(marker, 'camera', icon='CAMERA_DATA')
 
 
 ########################################################################################################################

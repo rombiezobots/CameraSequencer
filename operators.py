@@ -34,7 +34,7 @@ class CAMERASEQUENCER_OT_set_render_range(bpy.types.Operator):
     '''Set the render frame range to encompass the selected shots'''
 
     bl_idname = 'camera_sequencer.set_render_range'
-    bl_label = 'Set Render Range to Selected'
+    bl_label = 'Set Render Range'
     bl_options = {'UNDO'}
 
     def execute(self, context):

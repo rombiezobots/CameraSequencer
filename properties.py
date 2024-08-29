@@ -18,6 +18,7 @@ class SceneProperties(bpy.types.PropertyGroup):
 
 class TimelineMarkerProperties(bpy.types.PropertyGroup):
     notes: bpy.props.StringProperty(name='Notes', default='This shot has no description yet.')
+    is_panel_open: bpy.props.BoolProperty(default=False)
 
 
 ########################################################################################################################
