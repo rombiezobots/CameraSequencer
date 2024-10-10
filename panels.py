@@ -27,11 +27,16 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
 
     def _get_warnings(self, scene):
         warnings = []
-        if len(scene.timeline_markers) == 0:
+        if not common.markers_chronological():
             warnings.append('The timeline has no markers yet.')
-        elif common.markers_chronological()[0].frame != scene.frame_start:
-            warnings.append('The scene\'s render range does not start with the first shot.')
-            return warnings
+        else:
+            if not common.target_range_starts_with_first_shot():
+                warnings.append('Target range doesn\'t start with the first shot.')
+            if not common.render_range_matches_marker_selection():
+                warnings.append('Render range doesn\'t match the shot selection.')
+        if not common.render_range_matches_target_range():
+            warnings.append('Render range doesn\'t match target range.')
+        return warnings
 
     def draw(self, context):
         scene = context.scene
@@ -42,12 +47,12 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
         # Scene-wide settings.
         box_settings = lay.box()
         box_settings.use_property_split = True
-        target_frame_range = box_settings.column(align=True)
-        target_frame_range.prop(scene.camera_sequencer, 'frame_start')
-        target_frame_range.prop(scene.camera_sequencer, 'frame_end')
-        render_frame_range = box_settings.column(align=True)
-        render_frame_range.prop(scene, 'frame_start', text='Render Start Frame')
-        render_frame_range.prop(scene, 'frame_end', text='Render End Frame')
+        render_range = box_settings.row(align=True)
+        render_range.prop(scene.camera_sequencer, 'frame_start', text='Target Frame Range')
+        render_range.prop(scene.camera_sequencer, 'frame_end', text='')
+        target_range = box_settings.row(align=True)
+        target_range.prop(scene, 'frame_start', text='Render Frame Range')
+        target_range.prop(scene, 'frame_end', text='')
         metadata = box_settings.column(align=True)
         metadata.prop(scene.render, 'use_stamp', text='Burn Metadata Into Image')
         metadata.prop(scene.render, 'use_stamp_marker', text='Include Marker Description')
@@ -78,7 +83,7 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
                 if marker != markers[-1]
                 else context.scene.camera_sequencer.frame_end
             )
-            dur = common.shot_duration(marker=marker)
+            dur = common.shot_duration(marker=marker) if marker.frame <= scene.camera_sequencer.frame_end else 0
             dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
 
             panels[marker.name] = box_shot_list.panel_prop(marker.camera_sequencer, 'is_panel_open')
