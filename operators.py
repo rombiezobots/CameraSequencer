@@ -62,20 +62,22 @@ class CAMERASEQUENCER_OT_set_frame_range(bpy.types.Operator):
 
         markers_chronological = common.markers_chronological()
 
-        if self.method == 'SELECTED_SHOTS':
-            first_shot = next(m for m in markers_chronological if m.select)
-            *_, last_shot = (m for m in markers_chronological if m.select)
-            last_frame = common.shot_frame_last(marker=last_shot)
-            context.scene.frame_start = first_shot.frame
-            context.scene.frame_end = last_frame
+        if markers_chronological:
 
-        elif self.method == 'TARGET_RANGE':
-            context.scene.camera_sequencer.frame_start = context.scene.frame_start
-            context.scene.camera_sequencer.frame_end = context.scene.frame_end
+            if self.method == 'SELECTED_SHOTS':
+                first_shot = next(m for m in markers_chronological if m.select)
+                *_, last_shot = (m for m in markers_chronological if m.select)
+                last_frame = common.shot_frame_last(marker=last_shot)
+                context.scene.frame_start = first_shot.frame
+                context.scene.frame_end = last_frame
 
-        elif self.method == 'RENDER_RANGE':  # Reset
-            context.scene.frame_start = context.scene.camera_sequencer.frame_start
-            context.scene.frame_end = context.scene.camera_sequencer.frame_end
+            elif self.method == 'TARGET_RANGE':
+                context.scene.camera_sequencer.frame_start = context.scene.frame_start
+                context.scene.camera_sequencer.frame_end = context.scene.frame_end
+
+            elif self.method == 'RENDER_RANGE':  # Reset
+                context.scene.frame_start = context.scene.camera_sequencer.frame_start
+                context.scene.frame_end = context.scene.camera_sequencer.frame_end
 
         return {'FINISHED'}
 
