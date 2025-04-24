@@ -62,7 +62,9 @@ def render_range_matches_target_range() -> bool:
 def render_range_matches_marker_selection() -> bool:
     '''Check whether the render range encompasses the shot selection exactly'''
     markers = markers_chronological()
-    first_shot = next(m for m in markers if m.select)
-    *_, last_shot = (m for m in markers if m.select)
-    scene = bpy.context.scene
-    return scene.frame_start == first_shot.frame and scene.frame_end == shot_frame_last(marker=last_shot)
+    first_shot = next((m for m in markers if m.select), None)
+    if first_shot:
+        *_, last_shot = (m for m in markers if m.select)
+        scene = bpy.context.scene
+        return scene.frame_start == first_shot.frame and scene.frame_end == shot_frame_last(marker=last_shot)
+    return True
