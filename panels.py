@@ -83,8 +83,6 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
                 if marker != markers[-1]
                 else context.scene.camera_sequencer.frame_end
             )
-            dur = common.shot_duration(marker=marker) if marker.frame <= scene.camera_sequencer.frame_end else 0
-            dur_secs = round(dur / scene.render.fps * scene.render.fps_base, 2)
 
             panels[marker.name] = box_shot_list.panel_prop(marker.camera_sequencer, 'is_panel_open')
 
@@ -96,13 +94,10 @@ class PROPERTIES_PT_camera_sequencer(bpy.types.Panel):
             row_name_select.prop(marker, 'select', text='')
             row_name_select.prop(marker, 'name', text='')
 
-            split_time = split_header.split(factor=0.45)
-
+            split_time = split_header.split(factor=0.6)
             split_time.label(text=f'{marker.frame}-{end_frame}')
-
-            row_durations = split_time.split(factor=0.45)
-            row_durations.label(text=f'{dur} f')
-            row_durations.label(text=f'{dur_secs} s')
+            duration = common.shot_duration(marker=marker) if marker.frame <= scene.camera_sequencer.frame_end else '0f'
+            split_time.label(text=duration)
 
             isolate_shot = row_header.operator('camera_sequencer.isolate_shot', text='', icon='VIEWZOOM')
             isolate_shot.marker_frame = marker.frame

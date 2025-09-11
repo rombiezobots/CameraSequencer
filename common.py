@@ -37,9 +37,11 @@ def shot_frame_last(marker: bpy.types.TimelineMarker) -> int:
     return None
 
 
-def shot_duration(marker: bpy.types.TimelineMarker) -> int:
-    frame_last = shot_frame_last(marker=marker)
-    return frame_last + 1 - marker.frame
+def shot_duration(marker: bpy.types.TimelineMarker) -> str:
+    frames_total = shot_frame_last(marker=marker) + 1 - marker.frame
+    secs = int(frames_total // (bpy.context.scene.render.fps * bpy.context.scene.render.fps_base))
+    frames_remainder = int(frames_total % (bpy.context.scene.render.fps * bpy.context.scene.render.fps_base))
+    return f'{secs:02}:{frames_remainder:02}'
 
 
 # Warning checks
